@@ -68,16 +68,30 @@
     <Compile Include="Controls\CountryBox.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="Data\Brand.cs" />
     <Compile Include="Data\Customer.cs" />
     <Compile Include="Data\CustomerCollection.cs" />
     <Compile Include="Data\Gender.cs" />
+    <Compile Include="Data\Invoice.cs" />
+    <Compile Include="Data\InvoiceCollection.cs" />
+    <Compile Include="Data\InvoiceItem.cs" />
+    <Compile Include="Data\InvoiceItemCollection.cs" />
     <Compile Include="Data\ObjectState.cs" />
+    <Compile Include="Data\Price.cs" />
+    <Compile Include="Data\Product.cs" />
     <Compile Include="Dialogs\CustomerDialog.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Dialogs\CustomerDialog.Designer.cs">
       <DependentUpon>CustomerDialog.cs</DependentUpon>
     </Compile>
+    <Compile Include="Dialogs\InvoiceDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Dialogs\InvoiceDialog.Designer.cs">
+      <DependentUpon>InvoiceDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Extensions\IEnumerableHelper.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -91,6 +105,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Dialogs\CustomerDialog.resx">
       <DependentUpon>CustomerDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Dialogs\InvoiceDialog.resx">
+      <DependentUpon>InvoiceDialog.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>

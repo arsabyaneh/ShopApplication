@@ -49,6 +49,8 @@
             this.Code = new System.Windows.Forms.MaskedTextBox();
             this.OK = new System.Windows.Forms.Button();
             this.Cancel = new System.Windows.Forms.Button();
+            this.EmailLabel = new System.Windows.Forms.Label();
+            this.Email = new System.Windows.Forms.TextBox();
             this.CustomerGroupBox.SuspendLayout();
             this.Panel.SuspendLayout();
             this.SuspendLayout();
@@ -127,7 +129,7 @@
             // 
             this.AddressLabel.AutoSize = true;
             this.AddressLabel.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.AddressLabel.Location = new System.Drawing.Point(19, 224);
+            this.AddressLabel.Location = new System.Drawing.Point(19, 251);
             this.AddressLabel.Name = "AddressLabel";
             this.AddressLabel.Size = new System.Drawing.Size(54, 14);
             this.AddressLabel.TabIndex = 7;
@@ -135,6 +137,8 @@
             // 
             // CustomerGroupBox
             // 
+            this.CustomerGroupBox.Controls.Add(this.Email);
+            this.CustomerGroupBox.Controls.Add(this.EmailLabel);
             this.CustomerGroupBox.Controls.Add(this.Address);
             this.CustomerGroupBox.Controls.Add(this.Telephone);
             this.CustomerGroupBox.Controls.Add(this.Country);
@@ -154,14 +158,14 @@
             this.CustomerGroupBox.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.CustomerGroupBox.Location = new System.Drawing.Point(12, 12);
             this.CustomerGroupBox.Name = "CustomerGroupBox";
-            this.CustomerGroupBox.Size = new System.Drawing.Size(420, 349);
+            this.CustomerGroupBox.Size = new System.Drawing.Size(420, 367);
             this.CustomerGroupBox.TabIndex = 8;
             this.CustomerGroupBox.TabStop = false;
             this.CustomerGroupBox.Text = "Customer Profile Info.";
             // 
             // Address
             // 
-            this.Address.Location = new System.Drawing.Point(95, 223);
+            this.Address.Location = new System.Drawing.Point(95, 248);
             this.Address.Multiline = true;
             this.Address.Name = "Address";
             this.Address.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
@@ -181,6 +185,10 @@
             this.Country.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawVariable;
             this.Country.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.Country.FormattingEnabled = true;
+            this.Country.Items.AddRange(new object[] {
+            "Austria",
+            "Canada",
+            "France"});
             this.Country.Location = new System.Drawing.Point(95, 167);
             this.Country.Name = "Country";
             this.Country.Size = new System.Drawing.Size(317, 23);
@@ -250,7 +258,7 @@
             // OK
             // 
             this.OK.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.OK.Location = new System.Drawing.Point(276, 375);
+            this.OK.Location = new System.Drawing.Point(276, 391);
             this.OK.Name = "OK";
             this.OK.Size = new System.Drawing.Size(75, 23);
             this.OK.TabIndex = 9;
@@ -261,7 +269,7 @@
             // Cancel
             // 
             this.Cancel.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.Cancel.Location = new System.Drawing.Point(357, 375);
+            this.Cancel.Location = new System.Drawing.Point(357, 391);
             this.Cancel.Name = "Cancel";
             this.Cancel.Size = new System.Drawing.Size(75, 23);
             this.Cancel.TabIndex = 10;
@@ -269,11 +277,28 @@
             this.Cancel.UseVisualStyleBackColor = true;
             this.Cancel.Click += new System.EventHandler(this.Cancel_Click);
             // 
+            // EmailLabel
+            // 
+            this.EmailLabel.AutoSize = true;
+            this.EmailLabel.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.EmailLabel.Location = new System.Drawing.Point(19, 224);
+            this.EmailLabel.Name = "EmailLabel";
+            this.EmailLabel.Size = new System.Drawing.Size(38, 14);
+            this.EmailLabel.TabIndex = 15;
+            this.EmailLabel.Text = "Email:";
+            // 
+            // Email
+            // 
+            this.Email.Location = new System.Drawing.Point(95, 221);
+            this.Email.Name = "Email";
+            this.Email.Size = new System.Drawing.Size(317, 22);
+            this.Email.TabIndex = 16;
+            // 
             // CustomerDialog
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(444, 407);
+            this.ClientSize = new System.Drawing.Size(444, 425);
             this.Controls.Add(this.Cancel);
             this.Controls.Add(this.OK);
             this.Controls.Add(this.CustomerGroupBox);
@@ -311,5 +336,7 @@
         private System.Windows.Forms.TextBox Address;
         private System.Windows.Forms.Button OK;
         private System.Windows.Forms.Button Cancel;
+        private System.Windows.Forms.TextBox Email;
+        private System.Windows.Forms.Label EmailLabel;
     }
 }

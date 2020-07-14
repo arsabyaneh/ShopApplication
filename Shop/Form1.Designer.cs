@@ -37,6 +37,7 @@
             this.Edit = new System.Windows.Forms.Button();
             this.Exit = new System.Windows.Forms.Button();
             this.Save = new System.Windows.Forms.Button();
+            this.Invoices = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // Customers
@@ -60,6 +61,7 @@
             this.ImageList.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("ImageList.ImageStream")));
             this.ImageList.TransparentColor = System.Drawing.Color.Transparent;
             this.ImageList.Images.SetKeyName(0, "customers.png");
+            this.ImageList.Images.SetKeyName(1, "invoices.png");
             // 
             // ListViewPanel
             // 
@@ -113,11 +115,28 @@
             this.Save.UseVisualStyleBackColor = true;
             this.Save.Click += new System.EventHandler(this.Save_Click);
             // 
+            // Invoices
+            // 
+            this.Invoices.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
+            this.Invoices.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.Invoices.ImageIndex = 1;
+            this.Invoices.ImageList = this.ImageList;
+            this.Invoices.Location = new System.Drawing.Point(102, 12);
+            this.Invoices.Name = "Invoices";
+            this.Invoices.Size = new System.Drawing.Size(84, 66);
+            this.Invoices.TabIndex = 6;
+            this.Invoices.Text = "Invoices";
+            this.Invoices.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
+            this.Invoices.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
+            this.Invoices.UseVisualStyleBackColor = true;
+            this.Invoices.Click += new System.EventHandler(this.Invoices_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(719, 474);
+            this.Controls.Add(this.Invoices);
             this.Controls.Add(this.Save);
             this.Controls.Add(this.Exit);
             this.Controls.Add(this.Edit);
@@ -140,6 +159,7 @@
         private System.Windows.Forms.Button Edit;
         private System.Windows.Forms.Button Exit;
         private System.Windows.Forms.Button Save;
+        private System.Windows.Forms.Button Invoices;
     }
 }
 

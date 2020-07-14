@@ -33,6 +33,7 @@ namespace Shop.Dialogs
                 _Value.BirthDate = this.BirthDate.Value;
                 _Value.Country = this.Country.SelectedItem.ToString();
                 _Value.Telephone = this.Telephone.Text;
+                _Value.Email = this.Email.Text;
                 _Value.Address = this.Address.Text;
 
                 return _Value;
@@ -52,6 +53,7 @@ namespace Shop.Dialogs
                 this.BirthDate.Value = _Value.BirthDate;
                 this.Country.SelectedIndex = FindSelectedIndexOfCountry(_Value.Country);
                 this.Telephone.Text = _Value.Telephone;
+                this.Email.Text = _Value.Email;
                 this.Address.Text = _Value.Address;
             }
         }

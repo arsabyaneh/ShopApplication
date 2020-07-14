@@ -17,6 +17,7 @@ namespace Shop.Data
         private DateTime _BirthDate;
         private string _Country;
         private string _Telephone;
+        private string _Email;
         private string _Address;
 
         public ObjectState State { get; set; }
@@ -159,6 +160,23 @@ namespace Shop.Data
 
                 if (old != _Telephone)
                     this.OnPropertyChanged(new PropertyChangedEventArgs("Telephone"));
+            }
+        }
+
+        public string Email
+        {
+            get
+            {
+                return _Email;
+            }
+            set
+            {
+                string old = _Email;
+
+                _Email = value;
+
+                if (old != _Email)
+                    this.OnPropertyChanged(new PropertyChangedEventArgs("Email"));
             }
         }
 

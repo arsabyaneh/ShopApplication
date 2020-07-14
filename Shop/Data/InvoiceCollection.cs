@@ -9,10 +9,10 @@ using System.Windows.Forms;
 
 namespace Shop.Data
 {
-    public class CustomerCollection : ObservableCollection<Customer>
+    public class InvoiceCollection : ObservableCollection<Invoice>
     {
-        private static CustomerCollection _Current;
-        public static CustomerCollection Current
+        private static InvoiceCollection _Current;
+        public static InvoiceCollection Current
         {
             get
             {
@@ -27,19 +27,22 @@ namespace Shop.Data
             }
         }
 
-        private static List<Customer> RemovedCustomers;
+        private static List<Invoice> RemovedInvoices;
 
-        public static CustomerCollection LoadFromDataBase()
+        public static int InitialInvoiceCode { get; set; }
+
+        public static InvoiceCollection LoadFromDataBase()
         {
-            RemovedCustomers = new List<Customer>();
+            RemovedInvoices = new List<Invoice>();
+            InitialInvoiceCode = 1;
 
-            CustomerCollection Customers = new CustomerCollection();
+            InvoiceCollection Invoices = new InvoiceCollection();
 
             SqlConnection connection = new SqlConnection(System.Configuration.ConfigurationManager.ConnectionStrings["Shop"].ConnectionString);
             SqlCommand command = new SqlCommand
             {
                 Connection = connection,
-                CommandText = "CustomerCollection",
+                CommandText = "InvoiceCollection",
                 CommandType = System.Data.CommandType.StoredProcedure
             };
 
@@ -48,25 +51,30 @@ namespace Shop.Data
                 connection.Open();
                 SqlDataReader reader = command.ExecuteReader();
 
+                bool isFirstTime = true;
+
                 while (reader.Read())
                 {
-                    Customer customer = new Customer()
+                    if (isFirstTime)
+                    {
+                        isFirstTime = false;
+                        InitialInvoiceCode = int.Parse(
+                            (string)reader["Code"], System.Globalization.NumberStyles.Integer) + 1;
+                    }
+
+                    Invoice invoice = new Invoice()
                     {
                         ID = (long)reader["ID"],
                         Code = (string)reader["Code"],
-                        FirstName = (string)reader["FirstName"],
-                        LastName = (string)reader["LastName"],
-                        Gender = ((bool)reader["Gender"]) ? Gender.Male : Gender.Female,
-                        BirthDate = (DateTime)reader["BirthDate"],
-                        Country = (string)reader["Country"],
-                        Telephone = (string)reader["Telephone"],
-                        Email = (string)reader["Email"],
-                        Address = reader["Address"] == DBNull.Value ? null : (string)reader["Address"]
+                        InvoiceDate = (DateTime)reader["InvoiceDate"],
+                        Discount = (decimal)reader["Discount"],
+                        CustomerID = (long)reader["CustomerID"]
                     };
 
-                    customer.State = ObjectState.Original;
+                    invoice.InvoiceItems = invoice.InvoiceItems.LoadFromDataBase(invoice);
+                    invoice.State = ObjectState.Original;
 
-                    Customers.Add(customer);
+                    Invoices.Add(invoice);
                 }
 
                 reader.Close();
@@ -81,20 +89,20 @@ namespace Shop.Data
                     connection.Close();
             }
 
-            return Customers;
+            return Invoices;
         }
 
-        public void RefreshData(Customer customer)
+        public void RefreshData(Invoice invoice)
         {
             SqlConnection connection = new SqlConnection(System.Configuration.ConfigurationManager.ConnectionStrings["Shop"].ConnectionString);
             SqlCommand command = new SqlCommand
             {
                 Connection = connection,
-                CommandText = "SelectCustomer",
+                CommandText = "SelectInvoice",
                 CommandType = System.Data.CommandType.StoredProcedure
             };
             command.Parameters.Clear();
-            command.Parameters.AddWithValue("@ID", customer.ID);
+            command.Parameters.AddWithValue("@ID", invoice.ID);
 
             try
             {
@@ -103,18 +111,14 @@ namespace Shop.Data
 
                 if (reader.Read())
                 {
-                    customer.ID = (long)reader["ID"];
-                    customer.Code = (string)reader["Code"];
-                    customer.FirstName = (string)reader["FirstName"];
-                    customer.LastName = (string)reader["LastName"];
-                    customer.Gender = ((bool)reader["Gender"]) ? Gender.Male : Gender.Female;
-                    customer.BirthDate = (DateTime)reader["BirthDate"];
-                    customer.Country = (string)reader["Country"];
-                    customer.Telephone = (string)reader["Telephone"];
-                    customer.Email = (string)reader["Email"];
-                    customer.Address = reader["Address"] == DBNull.Value ? null : (string)reader["Address"];
+                    invoice.ID = (long)reader["ID"];
+                    invoice.Code = (string)reader["Code"];
+                    invoice.InvoiceDate = (DateTime)reader["InvoiceDate"];
+                    invoice.Discount = (decimal)reader["Discount"];
+                    invoice.CustomerID = (long)reader["CustomerID"];
 
-                    customer.State = ObjectState.Original;
+                    invoice.InvoiceItems.LoadFromDataBase(invoice);
+                    invoice.State = ObjectState.Original;
                 }
 
                 reader.Close();
@@ -143,10 +147,10 @@ namespace Shop.Data
             {
                 connection.Open();
 
-                command.CommandText = "SaveCustomer";
-                foreach (Customer customer in Current)
+                command.CommandText = "SaveInvoice";
+                foreach (Invoice invoice in Current)
                 {
-                    switch (customer.State)
+                    switch (invoice.State)
                     {
                         case ObjectState.Original:
                             continue;
@@ -155,16 +159,11 @@ namespace Shop.Data
                         case ObjectState.Modified:
                             command.Parameters.Clear();
 
-                            command.Parameters.AddWithValue("@ID", customer.ID);
-                            command.Parameters.AddWithValue("@Code", customer.Code);
-                            command.Parameters.AddWithValue("@FirstName", customer.FirstName);
-                            command.Parameters.AddWithValue("@LastName", customer.LastName);
-                            command.Parameters.AddWithValue("@Gender", customer.Gender == Gender.Male ? "1" : "0");
-                            command.Parameters.AddWithValue("@BirthDate", customer.BirthDate);
-                            command.Parameters.AddWithValue("@Country", customer.Country ?? string.Empty);
-                            command.Parameters.AddWithValue("@Telephone", customer.Telephone);
-                            command.Parameters.AddWithValue("@Email", customer.Email);
-                            command.Parameters.AddWithValue("@Address", customer.Address);
+                            command.Parameters.AddWithValue("@ID", invoice.ID);
+                            command.Parameters.AddWithValue("@Code", invoice.Code);
+                            command.Parameters.AddWithValue("@InvoiceDate", invoice.InvoiceDate);
+                            command.Parameters.AddWithValue("@Discount", invoice.Discount);
+                            command.Parameters.AddWithValue("@CustomerID", invoice.CustomerID);
 
                             SqlParameter returnValue = new SqlParameter { Direction = System.Data.ParameterDirection.ReturnValue };
                             command.Parameters.Add(returnValue);
@@ -175,32 +174,32 @@ namespace Shop.Data
                             {
                                 case -1:
                                     MessageBox.Show(
-                                        string.Format("Code '{0}' for the '{1}' is dupplicated.",
-                                            customer.Code,
-                                            customer.FullName),
+                                        string.Format("Code '{0}' is dupplicated.", invoice.Code),
                                         "Error",
                                         MessageBoxButtons.OK,
                                         MessageBoxIcon.Error);
                                     break;
 
                                 case 0:
-                                    customer.ID = (long)result;
-                                    RefreshData(customer);
+                                    invoice.ID = (long)result;
+                                    RefreshData(invoice);
                                     break;
                             }
+
+                            invoice.InvoiceItems.SaveToDataBase();
 
                             break;
                     }
                 }
 
-                command.CommandText = "DeleteCustomer";
-                foreach (Customer customer in RemovedCustomers)
+                command.CommandText = "DeleteInvoice";
+                foreach (Invoice invoice in RemovedInvoices)
                 {
                     command.Parameters.Clear();
-                    command.Parameters.AddWithValue("@ID", customer.ID);
+                    command.Parameters.AddWithValue("@ID", invoice.ID);
                     command.ExecuteNonQuery();
                 }
-                RemovedCustomers.Clear();
+                RemovedInvoices.Clear();
             }
             catch (Exception ex)
             {
@@ -223,14 +222,14 @@ namespace Shop.Data
             {
                 foreach (var item in e.OldItems)
                 {
-                    RemovedCustomers.Add((Customer)item);
+                    RemovedInvoices.Add((Invoice)item);
                 }
             }
             else if (e.Action == System.Collections.Specialized.NotifyCollectionChangedAction.Add)
             {
                 foreach (var item in e.NewItems)
                 {
-                    (item as Customer).PropertyChanged += Customer_PropertyChanged;
+                    (item as Invoice).PropertyChanged += Customer_PropertyChanged;
                 }
             }
 
@@ -239,7 +238,7 @@ namespace Shop.Data
 
         private void Customer_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            (sender as Customer).State = ObjectState.Modified;
+            (sender as Invoice).State = ObjectState.Modified;
             // only to raise the event
             this.OnCollectionChanged(new System.Collections.Specialized.NotifyCollectionChangedEventArgs(System.Collections.Specialized.NotifyCollectionChangedAction.Reset));
         }
