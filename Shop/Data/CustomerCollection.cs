@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Shop.Extensions;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Data.SqlClient;
@@ -35,20 +36,8 @@ namespace Shop.Data
 
             CustomerCollection Customers = new CustomerCollection();
 
-            SqlConnection connection = new SqlConnection(System.Configuration.ConfigurationManager.ConnectionStrings["Shop"].ConnectionString);
-            SqlCommand command = new SqlCommand
-            {
-                Connection = connection,
-                CommandText = "CustomerCollection",
-                CommandType = System.Data.CommandType.StoredProcedure
-            };
-
-            try
-            {
-                connection.Open();
-                SqlDataReader reader = command.ExecuteReader();
-
-                while (reader.Read())
+            SqlHelper.ExecuteReader(SqlHelper.CreateCommand("CustomerCollection", System.Data.CommandType.StoredProcedure),
+                reader =>
                 {
                     Customer customer = new Customer()
                     {
@@ -68,40 +57,15 @@ namespace Shop.Data
 
                     Customers.Add(customer);
                 }
-
-                reader.Close();
-            }
-            catch
-            {
-
-            }
-            finally
-            {
-                if (connection.State == System.Data.ConnectionState.Open)
-                    connection.Close();
-            }
+                );
 
             return Customers;
         }
 
         public void RefreshData(Customer customer)
         {
-            SqlConnection connection = new SqlConnection(System.Configuration.ConfigurationManager.ConnectionStrings["Shop"].ConnectionString);
-            SqlCommand command = new SqlCommand
-            {
-                Connection = connection,
-                CommandText = "SelectCustomer",
-                CommandType = System.Data.CommandType.StoredProcedure
-            };
-            command.Parameters.Clear();
-            command.Parameters.AddWithValue("@ID", customer.ID);
-
-            try
-            {
-                connection.Open();
-                SqlDataReader reader = command.ExecuteReader();
-
-                if (reader.Read())
+            SqlHelper.ExecuteReader(SqlHelper.CreateCommand("SelectCustomer", System.Data.CommandType.StoredProcedure, new SqlParameter("@ID", customer.ID)),
+                reader =>
                 {
                     customer.ID = (long)reader["ID"];
                     customer.Code = (string)reader["Code"];
@@ -116,32 +80,16 @@ namespace Shop.Data
 
                     customer.State = ObjectState.Original;
                 }
-
-                reader.Close();
-            }
-            catch
-            {
-
-            }
-            finally
-            {
-                if (connection.State == System.Data.ConnectionState.Open)
-                    connection.Close();
-            }
+                );
         }
 
         public void SaveToDataBase()
         {
-            SqlConnection connection = new SqlConnection(System.Configuration.ConfigurationManager.ConnectionStrings["Shop"].ConnectionString);
-            SqlCommand command = new SqlCommand
-            {
-                Connection = connection,
-                CommandType = System.Data.CommandType.StoredProcedure
-            };
+            SqlCommand command = SqlHelper.CreateCommand("SaveCustomer", System.Data.CommandType.StoredProcedure);
 
             try
             {
-                connection.Open();
+                command.Connection.Open();
 
                 command.CommandText = "SaveCustomer";
                 foreach (Customer customer in Current)
@@ -155,6 +103,9 @@ namespace Shop.Data
                         case ObjectState.Modified:
                             command.Parameters.Clear();
 
+                            SqlParameter returnValue = new SqlParameter { Direction = System.Data.ParameterDirection.ReturnValue };
+                            command.Parameters.Add(returnValue);
+
                             command.Parameters.AddWithValue("@ID", customer.ID);
                             command.Parameters.AddWithValue("@Code", customer.Code);
                             command.Parameters.AddWithValue("@FirstName", customer.FirstName);
@@ -165,9 +116,6 @@ namespace Shop.Data
                             command.Parameters.AddWithValue("@Telephone", customer.Telephone);
                             command.Parameters.AddWithValue("@Email", customer.Email);
                             command.Parameters.AddWithValue("@Address", customer.Address);
-
-                            SqlParameter returnValue = new SqlParameter { Direction = System.Data.ParameterDirection.ReturnValue };
-                            command.Parameters.Add(returnValue);
 
                             object result = command.ExecuteScalar();
 
@@ -211,10 +159,9 @@ namespace Shop.Data
             }
             finally
             {
-                if (connection.State == System.Data.ConnectionState.Open)
-                    connection.Close();
+                if (command.Connection.State == System.Data.ConnectionState.Open)
+                    command.Connection.Close();
             }
-
         }
 
         protected override void OnCollectionChanged(System.Collections.Specialized.NotifyCollectionChangedEventArgs e)

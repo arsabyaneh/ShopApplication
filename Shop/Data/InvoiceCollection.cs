@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Shop.Extensions;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Data.SqlClient;
@@ -38,22 +39,10 @@ namespace Shop.Data
 
             InvoiceCollection Invoices = new InvoiceCollection();
 
-            SqlConnection connection = new SqlConnection(System.Configuration.ConfigurationManager.ConnectionStrings["Shop"].ConnectionString);
-            SqlCommand command = new SqlCommand
-            {
-                Connection = connection,
-                CommandText = "InvoiceCollection",
-                CommandType = System.Data.CommandType.StoredProcedure
-            };
+            bool isFirstTime = true;
 
-            try
-            {
-                connection.Open();
-                SqlDataReader reader = command.ExecuteReader();
-
-                bool isFirstTime = true;
-
-                while (reader.Read())
+            SqlHelper.ExecuteReader(SqlHelper.CreateCommand("InvoiceCollection", System.Data.CommandType.StoredProcedure),
+                reader =>
                 {
                     if (isFirstTime)
                     {
@@ -76,40 +65,15 @@ namespace Shop.Data
 
                     Invoices.Add(invoice);
                 }
-
-                reader.Close();
-            }
-            catch
-            {
-
-            }
-            finally
-            {
-                if (connection.State == System.Data.ConnectionState.Open)
-                    connection.Close();
-            }
+                );
 
             return Invoices;
         }
 
         public void RefreshData(Invoice invoice)
         {
-            SqlConnection connection = new SqlConnection(System.Configuration.ConfigurationManager.ConnectionStrings["Shop"].ConnectionString);
-            SqlCommand command = new SqlCommand
-            {
-                Connection = connection,
-                CommandText = "SelectInvoice",
-                CommandType = System.Data.CommandType.StoredProcedure
-            };
-            command.Parameters.Clear();
-            command.Parameters.AddWithValue("@ID", invoice.ID);
-
-            try
-            {
-                connection.Open();
-                SqlDataReader reader = command.ExecuteReader();
-
-                if (reader.Read())
+            SqlHelper.ExecuteReader(SqlHelper.CreateCommand("SelectInvoice", System.Data.CommandType.StoredProcedure, new SqlParameter("@ID", invoice.ID)),
+                reader =>
                 {
                     invoice.ID = (long)reader["ID"];
                     invoice.Code = (string)reader["Code"];
@@ -120,32 +84,16 @@ namespace Shop.Data
                     invoice.InvoiceItems.LoadFromDataBase(invoice);
                     invoice.State = ObjectState.Original;
                 }
-
-                reader.Close();
-            }
-            catch
-            {
-
-            }
-            finally
-            {
-                if (connection.State == System.Data.ConnectionState.Open)
-                    connection.Close();
-            }
+                );
         }
 
         public void SaveToDataBase()
         {
-            SqlConnection connection = new SqlConnection(System.Configuration.ConfigurationManager.ConnectionStrings["Shop"].ConnectionString);
-            SqlCommand command = new SqlCommand
-            {
-                Connection = connection,
-                CommandType = System.Data.CommandType.StoredProcedure
-            };
+            SqlCommand command = SqlHelper.CreateCommand("SaveInvoice", System.Data.CommandType.StoredProcedure);
 
             try
             {
-                connection.Open();
+                command.Connection.Open();
 
                 command.CommandText = "SaveInvoice";
                 foreach (Invoice invoice in Current)
@@ -159,14 +107,14 @@ namespace Shop.Data
                         case ObjectState.Modified:
                             command.Parameters.Clear();
 
+                            SqlParameter returnValue = new SqlParameter { Direction = System.Data.ParameterDirection.ReturnValue };
+                            command.Parameters.Add(returnValue);
+
                             command.Parameters.AddWithValue("@ID", invoice.ID);
                             command.Parameters.AddWithValue("@Code", invoice.Code);
                             command.Parameters.AddWithValue("@InvoiceDate", invoice.InvoiceDate);
                             command.Parameters.AddWithValue("@Discount", invoice.Discount);
                             command.Parameters.AddWithValue("@CustomerID", invoice.CustomerID);
-
-                            SqlParameter returnValue = new SqlParameter { Direction = System.Data.ParameterDirection.ReturnValue };
-                            command.Parameters.Add(returnValue);
 
                             object result = command.ExecuteScalar();
 
@@ -210,10 +158,9 @@ namespace Shop.Data
             }
             finally
             {
-                if (connection.State == System.Data.ConnectionState.Open)
-                    connection.Close();
+                if (command.Connection.State == System.Data.ConnectionState.Open)
+                    command.Connection.Close();
             }
-
         }
 
         protected override void OnCollectionChanged(System.Collections.Specialized.NotifyCollectionChangedEventArgs e)

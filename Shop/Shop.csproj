@@ -92,6 +92,7 @@
       <DependentUpon>InvoiceDialog.cs</DependentUpon>
     </Compile>
     <Compile Include="Extensions\IEnumerableHelper.cs" />
+    <Compile Include="Extensions\SqlHelper.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
     </Compile>
